@@ -5,6 +5,7 @@
  )
  (libraries alcotest alcotest.stdlib_ext alcotest-lwt lwt lwt.unix)
  (modes native)
+ (preprocess (pps ppx_alcotest))
  (modules
    async_failure
    fail_with

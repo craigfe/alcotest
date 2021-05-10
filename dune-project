@@ -1,5 +1,4 @@
 (lang dune 2.8)
-(implicit_transitive_deps false)
 (generate_opam_files true)
 
 (name alcotest)
@@ -93,3 +92,6 @@ tests to run.
   (js_of_ocaml-compiler (>= 3.11.0))
   (fmt (and :with-test (>= 0.8.7)))
   (cmdliner (and :with-test (>= 1.0.0) (< 1.1.0)))))
+
+(package
+ (name ppx_alcotest))

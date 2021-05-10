@@ -18,6 +18,7 @@
  )
  (libraries alcotest alcotest.stdlib_ext alcotest.engine)
  (modes native js)
+ (preprocess (pps ppx_alcotest))
  (modules
    bail
    check_basic

@@ -16,6 +16,7 @@
    json_output
    list_tests
    only_monadic_effects
+   ppx
    quick_only
    quick_only_regex
    separator_testname
@@ -24,6 +25,7 @@
  )
  (libraries alcotest alcotest.stdlib_ext alcotest.engine)
  (modes native js)
+ (preprocess (pps ppx_alcotest))
  (modules
    and_exit_false
    and_exit_true
@@ -41,6 +43,7 @@
    json_output
    list_tests
    only_monadic_effects
+   ppx
    quick_only
    quick_only_regex
    separator_testname
@@ -656,6 +659,44 @@
  (package alcotest)
  (action
    (diff only_monadic_effects-js.expected only_monadic_effects-js.processed)))
+
+(rule
+ (target ppx.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:ppx.exe})))))
+
+(rule
+ (target ppx.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:ppx.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff ppx.expected ppx.processed)))
+
+(rule
+ (target ppx-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 125)
+    (run node %{dep:ppx.bc.js})))))
+
+(rule
+ (target ppx-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:ppx-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff ppx-js.expected ppx-js.processed)))
 
 (rule
  (target quick_only.actual)
