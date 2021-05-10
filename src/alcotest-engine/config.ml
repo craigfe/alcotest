@@ -209,7 +209,7 @@ module Key = struct
     module V2 = struct
       type t = filter_v2
 
-      let of_v1 ~quick_only position_filter tags =
+      let of_v1 ~quick_only position_filter _ tags =
         let speed_level =
           match Tag.Set.find Tag.Speed_level.tag tags with
           | Some `Slow -> if quick_only then `Skip else `Run
@@ -227,7 +227,24 @@ module Key = struct
 
     type t = [ `V1 of V1.t | `V2 of V2.t ]
 
-    let default = Tag.Filter.default
+    let default =
+      (* TODO: duplicated *)
+      let only_if _ s =
+        match Tag.Set.find Tag.Predicate.tag s with
+        | Some p -> p ()
+        | None -> `Run
+      in
+
+      let quick_only_config c s =
+        match Tag.Set.find Tag.Speed_level.tag s with
+        | Some `Slow when c#quick_only -> `Skip
+        | _ -> `Run
+      in
+
+      let ( ++ ) f g a b =
+        match (f a b, g a b) with `Run, `Run -> `Run | _, _ -> `Skip
+      in
+      only_if ++ quick_only_config
   end
 end
 
@@ -317,8 +334,8 @@ let apply_defaults ~default_log_dir : User.t -> t =
        verbose;
        compact;
        tail_errors;
-       quick_only;
        show_errors;
+       quick_only;
        json;
        filter;
        log_dir;

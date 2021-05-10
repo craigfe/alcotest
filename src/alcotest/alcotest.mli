@@ -82,7 +82,7 @@ module Unstable : sig
       ?quick_only:bool ->
       ?show_errors:bool ->
       ?json:bool ->
-      ?filter:Tag.Filter.t ->
+      ?filter:Filter.t ->
       ?bail:bool ->
       ?log_dir:string ->
       unit ->
