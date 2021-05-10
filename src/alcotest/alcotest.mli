@@ -154,6 +154,10 @@ module Unstable : sig
        and type 'a m := 'a
        and type source_code_position := Source_code_position.t
        and type config := Config.t
+
+  module type Suite = sig
+    val _ppx_alcotest_suite : unit test list
+  end
 end
 
 (** {1 Unix-specific engine constructors}
