@@ -50,19 +50,17 @@ module Suite (M : Monad.S) = struct
   module M = Monad.Extend (M)
   open M.Syntax
 
-  type 'a test =
-    | Test of {
-        name : Safe_string.t;
-        loc : Source_code_position.pos option;
-        tags : Tag.Set.t;
-        fn : 'a -> unit M.t;
-      }
-    | Group of {
-        name : Safe_string.t;
-        loc : Source_code_position.pos option;
-        tags : Tag.Set.t;
-        children : 'a test list;
-      }
+  type filter_result = [ `Run | `Skip ]
+  type filter = Tag.Set.t -> filter_result
+
+  type 'a test = {
+    label : Safe_string.t;
+    loc : Source_code_position.pos option;
+    tags : Tag.Set.t;
+    node : 'a test_node;
+  }
+
+  and 'a test_node = Test of ('a -> unit M.t) | Group of 'a test list
 
   let test ~name ~loc ~tags fn =
     let label = Safe_string.v name in
