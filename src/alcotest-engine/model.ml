@@ -71,7 +71,9 @@ module Suite (M : Monad.S) = struct
     { label; loc; tags; node = Group children }
 
   type 'a t = {
-    name : Safe_string.t;
+    identifier : Safe_string.t;
+    name : Safe_string.t option;
+    file : string option;
     loc : Source_code_position.pos option;
     tests : 'a test list;
   }
@@ -100,13 +102,17 @@ module Suite (M : Monad.S) = struct
     in
     fun ts -> aux [] ts
 
-  let of_tests ~name ~loc tests =
+  let of_tests ~name ~file ~loc tests =
     let open Result.Syntax in
     let* () = validate_tests tests in
-    if String.is_empty name then Error `Empty_name
-    else
-      let name = Safe_string.v name in
-      Ok { name; loc; tests }
+    match (name, file) with
+    | Some x, _ when x = "" -> Error `Empty_name
+    | _, Some x when x = "" -> Error `Empty_file
+    | None, None -> Error `No_identifier
+    | Some identifier, _ | _, Some identifier ->
+        let identifier = Safe_string.v identifier in
+        let name = Option.map Safe_string.v name in
+        Ok { identifier; name; file; loc; tests }
 
   let rec list_fold_until ~f ~init:acc ~finish = function
     | [] -> M.return (finish acc)
@@ -152,18 +158,25 @@ module Suite (M : Monad.S) = struct
       ~group:(fun _ a x -> M.return (Continue (group a x)))
       ~test:(fun _ a x -> M.return (Continue (test a x)))
 
-  let name { name; _ } = Safe_string.to_string name
-  let pp_name ppf { name; _ } = Safe_string.pp ppf name
+  let identifier { identifier; _ } = Safe_string.to_string identifier
+  let pp_name { name; _ } = Option.map (Fun.flip Safe_string.pp) name
+  let pp_file { file; _ } = Option.map (Fun.flip Fmt.string) file
 
-  let rec pp_files ~pre ~last_dir ppf files =
+  let pp_tags ppf ts =
+    let open Fmt in
+    string ppf "< ";
+    list ~sep:(const string "; ") Tag.pp ppf (Tag.Set.to_list ts);
+    Fmt.string ppf " >"
+
+  let rec pp_nodes ~pre ~last_dir ppf files =
     let open Fmt in
     (* Only print newline at the end if our ancestors have not already done so
        (i.e. we are not the descendant of a last directory *)
     let pp_last_dir ppf last_dir = if not last_dir then pf ppf "@,%s" pre in
     let pp_children_last ppf =
-      pf ppf "%s└─ %a" pre (pp_file ~last_dir:true ~pre:(pre ^ "   "))
+      pf ppf "%s└─ %a" pre (pp_node ~last_dir:true ~pre:(pre ^ "   "))
     and pp_children_not_last ppf =
-      pf ppf "%s├─ %a" pre (pp_file ~last_dir:false ~pre:(pre ^ "│  "))
+      pf ppf "%s├─ %a" pre (pp_node ~last_dir:false ~pre:(pre ^ "│  "))
     in
     match files with
     | [] -> ()
@@ -178,7 +191,7 @@ module Suite (M : Monad.S) = struct
           (list ~sep:cut pp_children_not_last)
           not_last pp_children_last last pp_last_dir last_dir
 
-  and pp_file ~pre ~last_dir ppf =
+  and pp_node ~pre ~last_dir ppf =
     let open Fmt in
     let pp_group_name = styled `Bold (styled `Blue Safe_string.pp) in
     function
@@ -188,17 +201,14 @@ module Suite (M : Monad.S) = struct
           tags
     | { node = Group children; label; _ } ->
         pp_group_name ppf label;
-        pp_files ~pre ~last_dir ppf children
-
-  and pp_tags ppf ts =
-    let open Fmt in
-    string ppf "< ";
-    list ~sep:(const string "; ") Tag.pp ppf (Tag.Set.to_list ts);
-    Fmt.string ppf " >"
-
-  let pp_file ppf t = pp_file ~pre:"" ~last_dir:false ppf t
+        pp_nodes ~pre ~last_dir ppf children
 
   let pp ppf t =
-    pp_file ppf
-      { node = Group t.tests; label = t.name; loc = None; tags = Tag.Set.empty }
+    pp_node ~pre:"" ~last_dir:false ppf
+      {
+        node = Group t.tests;
+        label = t.identifier;
+        loc = None;
+        tags = Tag.Set.empty;
+      }
 end

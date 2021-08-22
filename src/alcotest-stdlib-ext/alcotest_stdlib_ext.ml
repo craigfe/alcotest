@@ -4,6 +4,7 @@ type ('a, 'b) continue_or_stop = Continue of 'a | Stop of 'b
 
 module Fun = struct
   let id x = x
+  let flip f b a = f a b
 end
 
 module Int = struct

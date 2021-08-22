@@ -26,10 +26,11 @@ module type Alcotest_async = sig
     open Alcotest_engine.Unstable
 
     include
-      Cli.S
+      Core.S
         with type 'a m := 'a Async_kernel.Deferred.t
          and type 'a test_args := 'a
          and type config := Config.User.t
+         and type source_code_position := Source_code_position.pos
          and type tag_set := Tag.Set.t
 
     val test :

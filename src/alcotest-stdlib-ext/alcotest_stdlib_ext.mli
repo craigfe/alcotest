@@ -7,6 +7,7 @@ type ('a, 'b) continue_or_stop = Continue of 'a | Stop of 'b
 
 module Fun : sig
   val id : 'a -> 'a
+  val flip : ('a -> 'b -> 'c) -> 'b -> 'a -> 'c
 end
 
 module Int : sig

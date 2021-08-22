@@ -75,16 +75,23 @@ module Suite (M : Monad.S) : sig
     'acc M.t
 
   val of_tests :
-    name:string ->
+    name:string option ->
+    file:string option ->
     loc:Source_code_position.pos option ->
     'a test list ->
-    ('a t, [ `Duplicate_path of string | `Empty_name ]) result
+    ( 'a t,
+      [ `Duplicate_path of string | `No_identifier | `Empty_name | `Empty_file ]
+    )
+    result
 
-  val name : _ t -> string
-  (** An escaped form of the suite name. *)
+  val identifier : _ t -> string
+  (** An escaped form of the suite name (or the file name, if [name = None]). *)
 
-  val pp_name : _ t Fmt.t
-  (** Pretty-print the unescaped suite name. *)
+  val pp_name : _ t -> (Format.formatter -> unit) option
+  (** Pretty-print the unescaped suite name, if supplied. *)
+
+  val pp_file : _ t -> (Format.formatter -> unit) option
+  (** Pretty-print the source file of the suite, if supplied. *)
 
   val pp : _ t Fmt.t
 end

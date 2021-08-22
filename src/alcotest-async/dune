@@ -2,9 +2,9 @@
  (name alcotest_async)
  (public_name alcotest-async)
  (libraries
-  alcotest
   alcotest.engine
   alcotest.stdlib_ext
+  alcotest
   async_kernel
   async_unix
   base

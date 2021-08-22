@@ -45,15 +45,21 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   module Suite = struct
     include Suite (M)
 
-    let of_tests_exn ~name ~loc tests =
-      match of_tests ~name ~loc tests with
+    let of_tests_exn ~name ~file ~loc tests =
+      match of_tests ~name ~file ~loc tests with
       | Ok s -> s
       | Error (`Duplicate_path path) ->
           Pp.user_error "Duplicate test path: `%s'" path
+      | Error `Empty_file ->
+          Pp.user_error
+            "Suite file cannot be \"\". Please pass a non-empty string to \
+             `run`."
       | Error `Empty_name ->
           Pp.user_error
-            "Suite name cannot cannot be empty. Please pass a non-empty string \
-             to `run`."
+            "Suite name cannot be \"\". Please pass a non-empty string to \
+             `run`."
+      | Error `No_identifier ->
+          Pp.user_error "Suite name and file cannot cannot both be `None`"
   end
 
   module Log_trap = Log_trap.Make (M) (P)
@@ -92,7 +98,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       | true -> Log_trap.inactive
       | false ->
           Log_trap.active ~root:config#log_dir ~uuid:run_id
-            ~suite_name:(Suite.name suite)
+            ~suite_name:(Suite.identifier suite)
     in
     let progress_reporter =
       match config#json with
@@ -107,7 +113,6 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     { suite; errors = []; loc; config; run_id; log_trap; progress_reporter }
 
   type 'a test = 'a Suite.test
-  type 'a extra_info = ?here:Source_code_position.here -> ?tags:Tag.Set.t -> 'a
 
   let bt () = match Printexc.get_backtrace () with "" -> "" | s -> "\n" ^ s
 
@@ -220,6 +225,13 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   exception Test_error
 
+  let pp_suite_desc ppf suite =
+    match Suite.(pp_name suite, pp_file suite) with
+    | Some name, Some file -> Fmt.pf ppf "`%t', in file `%t'" name file
+    | Some name, None -> Fmt.pf ppf "`%t'" name
+    | None, Some file -> Fmt.pf ppf "file `%t'" file
+    | None, None -> assert false
+
   let perform_tests : type a. a t -> a -> int M.t =
    fun t args ->
     let currently_bailing acc =
@@ -227,13 +239,12 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     let test_it = perform_test t args in
     let* () = M.return () in
-    Fmt.pr "Testing %a.@,@[<v>%a@]"
-      (Pp.quoted Fmt.(styled `Bold Suite.pp_name))
-      t.suite
-      Fmt.(
-        styled `Faint (fun ppf () ->
-            pf ppf "This run has ID %a.@,@," (Pp.quoted string) t.run_id))
-      ();
+    Fmt.pr "Testing %a.@,@[<v>%t@]" pp_suite_desc t.suite
+      (Pp.map_theta
+         ~f:(Fmt.styled `Faint)
+         (fun ppf ->
+           Fmt.pf ppf "This run has ID %a.@,@," (Pp.quoted Fmt.string) t.run_id));
+
     let start_time = P.time () in
     let+ results =
       Suite.foldi_until t.suite
@@ -272,7 +283,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     failures
 
   let list_tests ?pos ?config:_ ~name tests =
-    let suite = Suite.of_tests_exn ~name ~loc:pos tests in
+    let suite = Suite.of_tests_exn ~name ~file:None ~loc:pos tests in
     Fmt.pr "@[<v>%a@]@." Suite.pp suite;
     M.return ()
 
@@ -280,10 +291,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let ( / ) = Filename.concat in
     lazy (P.getcwd () / "_build" / "_tests")
 
-  let run_with_args ?pos ?(config = Config.User.create ()) ~name test_ctx tests
-      =
+  let run_with_args ?pos ?(config = Config.User.create ()) ?name ?__FILE__:file
+      test_ctx tests =
     let config = Config.apply_defaults ~default_log_dir config in
-    let suite = Suite.of_tests_exn ~name ~loc:pos tests in
+    let suite = Suite.of_tests_exn ~name ~file ~loc:pos tests in
     let* at_least_one_test =
       Suite.foldi_until suite
         ~filter:(Filter.apply config#filter config)
@@ -307,7 +318,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     | _, true -> exit 1
     | _, false -> raise Test_error
 
-  let run ?pos ?config ~name suite = run_with_args ?pos ?config ~name () suite
+  let run ?pos ?config ?name ?__FILE__:file suite =
+    run_with_args ?pos ?config ?name ?__FILE__:file () suite
 end
 
 module Make_v1 : V1_types.MAKER =
@@ -369,7 +381,7 @@ functor
 
     let list_tests name (ts : _ test list) =
       let suite = migrate_suite ts in
-      X.list_tests ~name suite
+      X.list_tests ~name:(Some name) suite
 
     let run' config name (tl : unit test list) = run_main config name () tl
 

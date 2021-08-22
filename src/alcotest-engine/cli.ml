@@ -53,13 +53,13 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   module P = P (M)
   include C
 
-  let run ?pos ?(config = Config.User.create ()) ~name suite =
+  let run ?pos ?(config = Config.User.create ()) ?name ?__FILE__:file suite =
     let test_command =
       let term =
         let+ () = set_color (module P)
         and+ cli_config = Config.User.term ~and_exit:false in
         let config = Config.User.(cli_config || config) in
-        run ~name ?pos ~config suite
+        run ?pos ~config ?name ?__FILE__:file suite
       in
       (term, Term.info "test")
     in
@@ -76,8 +76,6 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     | (`Help | `Version | `Error `Exn) as result -> exit_or_return result
     | `Error (`Parse | `Term) as result ->
         exit (Term.exit_status_of_result result)
-
-  (* TODO *)
 end
 
 module Make_v1 : V1_types.MAKER =
@@ -171,6 +169,5 @@ module V1 = struct
 end
 
 module Unstable = struct
-  include Unstable_types
   module Make = Make
 end

@@ -106,61 +106,101 @@ module Types = struct
 end
 
 module Unstable_types = struct
-  module type S = sig
+  module type Test_constructors = sig
     (* These types are intended to be destructively-substituted by various
        backends. *)
 
     type 'a m
     type 'a test_args
     type tag_set
-    type config
+    type source_code_position
 
     type 'a test
     (** The type of unit tests. *)
 
-    type 'a extra_info = ?here:Source_code_position.here -> ?tags:tag_set -> 'a
-    (** Tests and test groups can be located by attaching source code positions
-        to them. *)
+    val test :
+      ?pos:source_code_position ->
+      ?tags:tag_set ->
+      name:string ->
+      ('a -> unit m) test_args ->
+      'a test
+    (** [test ~name f] is a named test that runs the function [f]. If [f] makes
+        a failing assertion (e.g. via [Alcotest.check]) or raises an exception,
+        then the test case will fail. Otherwise, the test case passes. *)
 
-    val test : (name:string -> ('a -> unit m) test_args -> 'a test) extra_info
-    (** [test ~name f] is a suite containing a single named test that runs [f].*)
+    val group :
+      ?pos:source_code_position ->
+      ?tags:tag_set ->
+      name:string ->
+      'a test list ->
+      'a test
+    (** [group ~name tests] is a group of tests with the given name.*)
+  end
 
-    val group : (name:string -> 'a test list -> 'a test) extra_info
-    (** [test_group ~name ts] *)
+  module type Test_runners = sig
+    type 'a m
+    type 'a test
+    type config
+    type source_code_position
 
     val run :
-      ?here:Source_code_position.here ->
+      ?pos:source_code_position ->
       ?config:config ->
-      name:string ->
+      ?name:string ->
+      ?__FILE__:string ->
       unit test list ->
       unit m
 
     val run_with_args :
-      ?here:Source_code_position.here ->
+      ?pos:source_code_position ->
       ?config:config ->
-      name:string ->
+      ?name:string ->
+      ?__FILE__:string ->
       'a ->
       'a test list ->
       unit m
+
+    (** {2 Log capturing}
+
+        Whenever a test is executed, its standard output / error streams are
+        redirected to a log file on disk. If the test fails, this log file is
+        printed to the *)
+
+    (** {2 Command-line interface}
+
+        The test suite runners can be configured at run-time via an
+        auto-generated command line interface, in addition to the [~config]
+        argument.
+
+        Run the binary with the [--help] option to see the full list of
+        supported command-line options (e.g. using
+        [dune exec ./path/to/text.exe -- --help]). *)
   end
 
   (** Extensions to {!S} for use by backends. *)
-  module type EXT = sig
-    include S
+  module type S = sig
+    include Test_constructors
+
+    include
+      Test_runners
+        with type 'a m := 'a m
+         and type 'a test := 'a test
+         and type source_code_position := source_code_position
 
     val list_tests :
-      ?here:Source_code_position.here ->
+      ?pos:source_code_position ->
       ?config:config ->
-      name:string ->
+      name:string option ->
       _ test list ->
       unit m
   end
 
   module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
-    EXT
+    S
       with type 'a m := 'a M.t
        and type 'a test_args := 'a
        and type config := Config.User.t
+       and type source_code_position := Source_code_position.pos
        and type tag_set := Tag.Set.t
 end
 
@@ -181,9 +221,7 @@ module type Core = sig
   module Unstable : sig
     type nonrec 'a identified = 'a identified
 
-    module type S = Unstable_types.S
-    module type MAKER = Unstable_types.MAKER
-
+    include module type of Unstable_types
     module Make : MAKER
   end
 end
