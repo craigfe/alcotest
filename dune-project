@@ -24,7 +24,7 @@ inspect), with a simple (yet expressive) query language to select the
 tests to run.
 ")
  (depends
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.06.0))
   (fmt (>= 0.8.7))
   astring
   (cmdliner (>= 1.0.0))
