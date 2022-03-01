@@ -40,10 +40,8 @@ module Unstable : sig
         with type 'a m := 'a Lwt.t
          and type 'a test_args := Lwt_switch.t -> 'a
          and type config := Config.User.t
-         and type source_code_position := Source_code_position.pos
          and type tag_set := Tag.Set.t
 
-    val test_sync :
-      (('a -> unit) -> 'a test) Alcotest_engine.Unstable.Core.identified
+    val test_sync : ?tags:Tag.Set.t -> name:string -> ('a -> unit) -> 'a test
   end
 end

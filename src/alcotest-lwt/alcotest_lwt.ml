@@ -37,10 +37,8 @@ module Unstable = struct
 
   include Tester
 
-  let test_sync ?pos ?tags ~name f =
-    test ?pos ?tags ~name (fun x -> Lwt.return (f x))
-
-  let test ?pos ?tags ~name f = test ?pos ?tags ~name (run_test f)
+  let test_sync ?tags ~name f = test ?tags ~name (fun x -> Lwt.return (f x))
+  let test ?tags ~name f = test ?tags ~name (run_test f)
 end
 
 include V1

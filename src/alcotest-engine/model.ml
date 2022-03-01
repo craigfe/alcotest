@@ -55,26 +55,24 @@ module Suite (M : Monad.S) = struct
 
   type 'a test = {
     label : Safe_string.t;
-    loc : Source_code_position.pos option;
     tags : Tag.Set.t;
     node : 'a test_node;
   }
 
   and 'a test_node = Test of ('a -> unit M.t) | Group of 'a test list
 
-  let test ~name ~loc ~tags fn =
+  let test ~name ~tags fn =
     let label = Safe_string.v name in
-    { label; loc; tags; node = Test fn }
+    { label; tags; node = Test fn }
 
-  let group ~name ~loc ~tags children =
+  let group ~name ~tags children =
     let label = Safe_string.v name in
-    { label; loc; tags; node = Group children }
+    { label; tags; node = Group children }
 
   type 'a t = {
     identifier : Safe_string.t;
     name : Safe_string.t option;
     file : string option;
-    loc : Source_code_position.pos option;
     tests : 'a test list;
   }
 
@@ -102,7 +100,7 @@ module Suite (M : Monad.S) = struct
     in
     fun ts -> aux [] ts
 
-  let of_tests ~name ~file ~loc tests =
+  let of_tests ~name ~file tests =
     let open Result.Syntax in
     let* () = validate_tests tests in
     match (name, file) with
@@ -112,7 +110,7 @@ module Suite (M : Monad.S) = struct
     | Some identifier, _ | _, Some identifier ->
         let identifier = Safe_string.v identifier in
         let name = Option.map Safe_string.v name in
-        Ok { identifier; name; file; loc; tests }
+        Ok { identifier; name; file; tests }
 
   let rec list_fold_until ~f ~init:acc ~finish = function
     | [] -> M.return (finish acc)
@@ -205,10 +203,5 @@ module Suite (M : Monad.S) = struct
 
   let pp ppf t =
     pp_node ~pre:"" ~last_dir:false ppf
-      {
-        node = Group t.tests;
-        label = t.identifier;
-        loc = None;
-        tags = Tag.Set.empty;
-      }
+      { node = Group t.tests; label = t.identifier; tags = Tag.Set.empty }
 end

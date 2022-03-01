@@ -45,6 +45,10 @@ module Position : sig
   val tag : (string * int) Key.t
 end
 
+module Source_code_position : sig
+  val tag : Source_code_position.pos Key.t
+end
+
 module Predicate : sig
   type t = unit -> [ `Run | `Skip ]
 

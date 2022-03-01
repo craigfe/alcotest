@@ -54,7 +54,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   include C
   open Cmdliner_syntax
 
-  let run ?pos ?(config = Config.User.create ()) ?name ?__FILE__:file suite =
+  let run ?(config = Config.User.create ()) ?name ?__FILE__:file suite =
     let test_command =
       let term =
         let+ () = set_color (module P)
@@ -62,7 +62,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           Config.User.term ~and_exit:false ~record_backtrace:true
         in
         let config = Config.User.(cli_config || config) in
-        run ?pos ~config ?name ?__FILE__:file suite
+        run ~config ?name ?__FILE__:file suite
       in
       (term, Term.info "test")
     in

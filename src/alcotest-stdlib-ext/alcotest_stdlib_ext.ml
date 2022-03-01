@@ -158,6 +158,10 @@ end
 module Source_code_position = struct
   type here = Lexing.position
   type pos = string * int * int * int
+
+  let pp_pos ppf (fname, line, cstart, cend) =
+    Format.fprintf ppf "File \"%s\", line %d, characters %d-%d" fname line
+      cstart cend
 end
 
 module Cmdliner_syntax = struct

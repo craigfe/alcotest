@@ -34,19 +34,8 @@ module Suite (M : Monad.S) : sig
   type filter_result = [ `Run | `Skip ]
   type filter = Tag.Set.t -> filter_result
 
-  val test :
-    name:string ->
-    loc:Source_code_position.pos option ->
-    tags:Tag.Set.t ->
-    ('a -> unit M.t) ->
-    'a test
-
-  val group :
-    name:string ->
-    loc:Source_code_position.pos option ->
-    tags:Tag.Set.t ->
-    'a test list ->
-    'a test
+  val test : name:string -> tags:Tag.Set.t -> ('a -> unit M.t) -> 'a test
+  val group : name:string -> tags:Tag.Set.t -> 'a test list -> 'a test
 
   type 'a t
 
@@ -77,7 +66,6 @@ module Suite (M : Monad.S) : sig
   val of_tests :
     name:string option ->
     file:string option ->
-    loc:Source_code_position.pos option ->
     'a test list ->
     ( 'a t,
       [ `Duplicate_path of string | `No_identifier | `Empty_name | `Empty_file ]

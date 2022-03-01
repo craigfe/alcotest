@@ -45,8 +45,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   module Suite = struct
     include Suite (M)
 
-    let of_tests_exn ~name ~file ~loc tests =
-      match of_tests ~name ~file ~loc tests with
+    let of_tests_exn ~name ~file tests =
+      match of_tests ~name ~file tests with
       | Ok s -> s
       | Error (`Duplicate_path path) ->
           Pp.user_error "Duplicate test path: `%s'" path
@@ -119,11 +119,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   let exn path name pp : Run_result.t =
     Exn (path, name, Fmt.(pp ++ const lines (bt ())))
 
-  let test ?pos ?(tags = Tag.Set.empty) ~name fn =
-    Suite.test ~name ~tags ~loc:pos fn
-
-  let group ?pos ?(tags = Tag.Set.empty) ~name ts =
-    Suite.group ~name ~tags ~loc:pos ts
+  let test ?(tags = Tag.Set.empty) ~name fn = Suite.test ~name ~tags fn
+  let group ?(tags = Tag.Set.empty) ~name ts = Suite.group ~name ~tags ts
 
   let pp_suite_results t =
     let log_dir = Log_trap.pp_current_run_dir t.log_trap in
@@ -282,8 +279,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     (pp_suite_results t) Fmt.stdout Pp.{ time; success; failures; errors };
     failures
 
-  let list_tests ?pos ?config:_ ~name tests =
-    let suite = Suite.of_tests_exn ~name ~file:None ~loc:pos tests in
+  let list_tests ?config:_ ~name tests =
+    let suite = Suite.of_tests_exn ~name ~file:None tests in
     Fmt.pr "@[<v>%a@]@." Suite.pp suite;
     M.return ()
 
@@ -291,10 +288,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let ( / ) = Filename.concat in
     lazy (P.getcwd () / "_build" / "_tests")
 
-  let run_with_args ?pos ?(config = Config.User.create ()) ?name ?__FILE__:file
+  let run_with_args ?(config = Config.User.create ()) ?name ?__FILE__:file
       test_ctx tests =
     let config = Config.apply_defaults ~default_log_dir config in
-    let suite = Suite.of_tests_exn ~name ~file ~loc:pos tests in
+    let suite = Suite.of_tests_exn ~name ~file tests in
     let* at_least_one_test =
       Suite.foldi_until suite
         ~filter:(Filter.apply config#filter config)
@@ -312,7 +309,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       exit 1);
     let initial_backtrace_status = Printexc.backtrace_status () in
     if config#record_backtrace then Printexc.record_backtrace true;
-    let t = v ~suite ~loc:pos ~config in
+    let t = v ~suite ~loc:None (* TODO *) ~config in
     let+ test_failures = perform_tests t test_ctx in
     if config#record_backtrace then
       Printexc.record_backtrace initial_backtrace_status;
@@ -322,8 +319,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     | _, true -> exit 1
     | _, false -> raise Test_error
 
-  let run ?pos ?config ?name ?__FILE__:file suite =
-    run_with_args ?pos ?config ?name ?__FILE__:file () suite
+  let run ?config ?name ?__FILE__:file suite =
+    run_with_args ?config ?name ?__FILE__:file () suite
 end
 
 module Make_v1 : V1_types.MAKER =
@@ -415,8 +412,6 @@ module V1 = struct
 end
 
 module Unstable = struct
-  type nonrec 'a identified = 'a identified
-
   include Unstable_types
   module Make = Make
 end

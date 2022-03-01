@@ -99,7 +99,6 @@ module Unstable : sig
       with type 'a test := 'a test
        and type 'a m := 'a
        and type 'a test_args := 'a
-       and type source_code_position := Source_code_position.t
        and type tag_set := Tag.Set.t
 
   (** {1:implementing Implementing tests} *)
@@ -152,7 +151,6 @@ module Unstable : sig
     Core.Test_runners
       with type 'a test := 'a test
        and type 'a m := 'a
-       and type source_code_position := Source_code_position.t
        and type config := Config.t
 end
 

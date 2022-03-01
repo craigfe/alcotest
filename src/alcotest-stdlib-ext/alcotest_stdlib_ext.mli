@@ -81,6 +81,8 @@ end
 module Source_code_position : sig
   type here = Lexing.position
   type pos = string * int * int * int
+
+  val pp_pos : Format.formatter -> pos -> unit
 end
 
 module Cmdliner_syntax : sig

@@ -102,12 +102,6 @@ end
 
 module Types = struct
   exception Check_error of unit Fmt.t
-
-  (* TODO(4.08): replace with local type substitution *)
-  type 'a identified =
-    ?pos:Source_code_position.pos -> ?tags:Tag.Set.t -> name:string -> 'a
-  (** A test suite is a tree of named test cases, with named internal nodes.
-      This type defines the metadata associated with each node in the tree: *)
 end
 
 module Unstable_types = struct
@@ -118,27 +112,17 @@ module Unstable_types = struct
     type 'a m
     type 'a test_args
     type tag_set
-    type source_code_position
 
     type 'a test
     (** The type of unit tests. *)
 
     val test :
-      ?pos:source_code_position ->
-      ?tags:tag_set ->
-      name:string ->
-      ('a -> unit m) test_args ->
-      'a test
+      ?tags:tag_set -> name:string -> ('a -> unit m) test_args -> 'a test
     (** [test ~name f] is a named test that runs the function [f]. If [f] makes
         a failing assertion (e.g. via [Alcotest.check]) or raises an exception,
         then the test case will fail. Otherwise, the test case passes. *)
 
-    val group :
-      ?pos:source_code_position ->
-      ?tags:tag_set ->
-      name:string ->
-      'a test list ->
-      'a test
+    val group : ?tags:tag_set -> name:string -> 'a test list -> 'a test
     (** [group ~name tests] is a group of tests with the given name.*)
   end
 
@@ -146,10 +130,8 @@ module Unstable_types = struct
     type 'a m
     type 'a test
     type config
-    type source_code_position
 
     val run :
-      ?pos:source_code_position ->
       ?config:config ->
       ?name:string ->
       ?__FILE__:string ->
@@ -157,7 +139,6 @@ module Unstable_types = struct
       unit m
 
     val run_with_args :
-      ?pos:source_code_position ->
       ?config:config ->
       ?name:string ->
       ?__FILE__:string ->
@@ -185,19 +166,10 @@ module Unstable_types = struct
   (** Extensions to {!S} for use by backends. *)
   module type S = sig
     include Test_constructors
-
-    include
-      Test_runners
-        with type 'a m := 'a m
-         and type 'a test := 'a test
-         and type source_code_position := source_code_position
+    include Test_runners with type 'a m := 'a m and type 'a test := 'a test
 
     val list_tests :
-      ?pos:source_code_position ->
-      ?config:config ->
-      name:string option ->
-      _ test list ->
-      unit m
+      ?config:config -> name:string option -> _ test list -> unit m
   end
 
   module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
@@ -205,7 +177,6 @@ module Unstable_types = struct
       with type 'a m := 'a M.t
        and type 'a test_args := 'a
        and type config := Config.User.t
-       and type source_code_position := Source_code_position.pos
        and type tag_set := Tag.Set.t
 end
 
@@ -224,8 +195,6 @@ module type Core = sig
   end
 
   module Unstable : sig
-    type nonrec 'a identified = 'a identified
-
     include module type of Unstable_types
     module Make : MAKER
   end

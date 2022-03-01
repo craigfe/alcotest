@@ -44,9 +44,7 @@ module Unstable = struct
     module Tester = Alcotest_engine.Unstable.Cli.Make (Platform (C)) (Lwt)
     include Tester
 
-    let test_sync ?pos ?tags ~name fn =
-      test ~name ?pos ?tags (fun x -> Lwt.return (fn x))
-
-    let test ?pos ?tags ~name fn = test ~name ?pos ?tags (run_test fn)
+    let test_sync ?tags ~name fn = test ~name ?tags (fun x -> Lwt.return (fn x))
+    let test ?tags ~name fn = test ~name ?tags (run_test fn)
   end
 end

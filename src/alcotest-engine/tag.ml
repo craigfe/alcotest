@@ -98,6 +98,12 @@ module Speed_level = struct
   let slow = V (tag, `Slow)
 end
 
+module Source_code_position = struct
+  let tag =
+    Key.create ~name:"Source_code_position" ~pp_data:(fun ppf x ->
+        Fmt.pf ppf "Source_code_position <%a>" Source_code_position.pp_pos x)
+end
+
 module Predicate = struct
   type t = unit -> [ `Run | `Skip ]
 
