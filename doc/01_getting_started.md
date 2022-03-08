@@ -21,15 +21,17 @@ at least the following structure:
 
 First let's set up the necessary build system configuration:
 
+<!-- $MDX file=snippets/testing_an_ocaml_library/dune-project -->
 ```dune
-;; dune-project
 (lang dune 3.0)
+;; dune-project
 ```
 
+<!-- $MDX file=snippets/testing_an_ocaml_library/dune.inc -->
 ```dune
 ;; dune
 
-;; Define an executable called `my_tests` (implicitly contained in the 
+;; Define an executable called `my_tests` (implicitly contained in the
 ;; OCaml module provided by `my_tests.ml`)
 (test
  (name my_tests)
@@ -39,6 +41,7 @@ First let's set up the necessary build system configuration:
 
 Now we can write some tests in `my_tests.ml`:
 
+<!-- $MDX file=snippets/testing_an_ocaml_library/my_tests.ml -->
 ```ocaml
 (* my_tests.ml *)
 
@@ -49,7 +52,6 @@ let%test "basic addition" =
 Running these tests will give a failure
 
 ```bash
-$ dune runtest
 ```
 
 ## Testing an OCaml library
