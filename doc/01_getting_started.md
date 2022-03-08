@@ -46,7 +46,9 @@ Now we can write some tests in `my_tests.ml`:
 (* my_tests.ml *)
 
 let%test "basic addition" =
-  [%check: int] ~expected:2 (1 + 1)
+  [%check: int] ~expected:5 (2 + 2)
+
+[%%runtests]
 ```
 
 Running these tests will give a failure

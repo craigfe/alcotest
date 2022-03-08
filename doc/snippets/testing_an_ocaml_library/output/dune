@@ -1,0 +1,14 @@
+(rule
+ (alias runtest)
+ (target test_output.actual)
+ (action
+  (with-outputs-to
+   %{target}
+   (with-accepted-exit-codes
+    125
+    (run %{dep:../my_tests.exe})))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff test_output.expected test_output.actual)))
