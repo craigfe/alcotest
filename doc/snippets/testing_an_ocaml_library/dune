@@ -1,1 +1,4 @@
-(include dune.inc)
+(executable
+ (name my_tests)
+ (libraries alcotest)
+ (preprocess (pps ppx_alcotest)))

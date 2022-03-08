@@ -48,12 +48,43 @@ Now we can write some tests in `my_tests.ml`:
 let%test "basic addition" =
   [%check: int] ~expected:5 (2 + 2)
 
-[%%runtests]
+[%%run_tests]
 ```
 
 Running these tests will give a failure
 
-```bash
+<!-- $MDX skip -->
+```
+$ dune runtest
+```
+
+<!-- $MDX file=snippets/testing_an_ocaml_library/output/test_output.expected -->
+```
+Testing `doc/snippets/testing_an_ocaml_library/my_tests.ml'.
+This run has ID `PH2QAM84'.
+
+test: internal error, uncaught exception:
+      Alcotest_engine__Core.Make(P)(M).Test_error
+      
+> [FAIL]    basic addition
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]    basic addition                                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "doc/snippets/testing_an_ocaml_library/my_tests.ml", line 0, character 0:
+
+   Expected: `5'
+   Received: `4'
+
+Raised at Alcotest_engine__Test.check in file "src/alcotest-engine/test.ml", line 196, characters 4-261
+Called from Alcotest_engine__Core.Make.protect_test.(fun) in file "src/alcotest-engine/core.ml", line 186, characters 17-23
+Called from Alcotest_engine__Monad.Identity.catch in file "src/alcotest-engine/monad.ml", line 24, characters 31-35
+
+Logs saved to `~/t/alcotest/_build/default/doc/snippets/testing_an_ocaml_library/output/_build/_tests/doc-snippets-testing_an_ocaml_library-my_tests.ml/basic addition.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `~/t/alcotest/_build/default/doc/snippets/testing_an_ocaml_library/output/_build/_tests/doc-snippets-testing_an_ocaml_library-my_tests.ml'.
+1 failure! in 0.000s. 1 test run.
 ```
 
 ## Testing an OCaml library

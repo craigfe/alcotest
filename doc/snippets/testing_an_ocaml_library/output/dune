@@ -3,10 +3,11 @@
  (target test_output.actual)
  (action
   (with-outputs-to
-   %{target}
+    %{target}
+   (setenv ALCOTEST_COLOR never
    (with-accepted-exit-codes
     125
-    (run %{dep:../my_tests.exe})))))
+    (run %{dep:../my_tests.exe}))))))
 
 (rule
  (alias runtest)

@@ -3,5 +3,5 @@
 let%test "basic addition" =
   [%check: int] ~expected:5 (2 + 2)
 
-[%%runtests]
+[%%run_tests]
 
