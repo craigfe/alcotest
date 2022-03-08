@@ -46,6 +46,12 @@ let%test "basic addition" =
   [%check: int] ~expected:2 (1 + 1)
 ```
 
+Running these tests will give a failure
+
+```bash
+$ dune runtest
+```
+
 ## Testing an OCaml library
 
 We've now written some self-contained test assertions in a top-level OCaml file,
@@ -56,15 +62,15 @@ ways with Dune, but a typical project structure might look like this:
 
 <!-- $MDX skip -->
 ```bash
-├── dune-project  # Top-level Dune project definition for Dune
+├── dune-project       # Top-level Dune project definition for Dune
 ├── lib/
 │   ├── dune           # Build rules for the library
-│   ...                # 
-│   └── my_library.ml  # Wrapper module defining the library API
+│   ├── my_library.ml  # Wrapper module defining the library API
+│   ...
 │
 └── test/
-    ├── dune      # Build rules for the library
-    └── main.ml   # Wrapper module defining the library API
+    ├── dune           # Build rules for the library
+    └── main.ml        # Wrapper module defining the library API
 ```
 
 [^2]:
