@@ -1,5 +1,6 @@
-(lang dune 2.8)
+(lang dune 3.0)
 (generate_opam_files true)
+(using mdx 0.2)
 
 (name alcotest)
 (source (github mirage/alcotest))
@@ -84,6 +85,7 @@ tests to run.
 
 (package
  (name alcotest-js)
+ (allow_empty)
  (synopsis "Virtual package containing optional JavaScript dependencies for Alcotest")
  (description "Virtual package containing optional JavaScript dependencies for Alcotest")
  (documentation "https://mirage.github.io/alcotest")

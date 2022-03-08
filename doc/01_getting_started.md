@@ -13,7 +13,7 @@ pre-processing extension, `ppx_alcotest`, with the
 We'll be writing our tests in a file called `my_tests.ml`, so let's set up a
 `dune` file with the right stanza:
 
-```lisp
+```dune
 (test
  (name my_tests)
  (libraries alcotest)
@@ -22,13 +22,9 @@ We'll be writing our tests in a file called `my_tests.ml`, so let's set up a
 
 Now we can write some tests in `my_tests.ml`:
 
-```ocaml title="my_tests.ml"
+```ocaml
 let%test "basic addition" =
-  [%check] ~expected:2 (1 + 1)
-```
-```mdx-error
-Line 1, characters 5-9:
-Error: Uninterpreted extension 'test'.
+  [%check: int] ~expected:2 (1 + 1)
 ```
 
 See the [next section](./02_testable_types.md) or [go back](../).

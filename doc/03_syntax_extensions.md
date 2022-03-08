@@ -22,9 +22,7 @@ end
 ```
 ```mdx-error
 Line 4, characters 3-6:
-Error: Syntax error: 'end' expected
-Line 1, characters 21-27:
-  This 'struct' might be unmatched
+Error: Syntax error
 ```
 
 
@@ -33,6 +31,7 @@ Line 1, characters 21-27:
 
 ### Assertion functions
 
+<!-- $MDX skip -->
 ```ocaml
 val [%check: typ] :
   ?here:Source_code_position.here -> 
@@ -45,8 +44,4 @@ val [%assert] :
   bool -> unit
   
 val [%here] : Source_code_position.here
-```
-```mdx-error
-Line 1, characters 5-7:
-Error: Syntax error
 ```

@@ -30,5 +30,9 @@ let () =
     ]
   ]
 ```
+```mdx-error
+Line 9, characters 21-37:
+Error: Unbound module Alcotest_lwt
+```
 
 If you're using `ppx_alcotest`, these can be added simply using:

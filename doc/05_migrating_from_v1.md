@@ -17,8 +17,8 @@ module Alcotest_lwt = Alcotest_lwt.V1
 module Alcotest_async = Alcotest_async.V1
 ```
 ```mdx-error
-Line 1, characters 19-30:
-Error: Unbound module Alcotest
+Line 4, characters 25-40:
+Error: Unbound module Alcotest_lwt
 ```
 
 This API provides stable support for the older style of test registration.
@@ -34,6 +34,10 @@ let () =
 
 ```
 ```mdx-error
-Line 3, characters 5-17:
-Error: Unbound module Alcotest
+Line 3, characters 5-28:
+Warning 5 [ignored-partial-application]: this function application is partial,
+maybe some arguments are missing.
+Line 3, characters 5-28:
+Error: This expression has type unit Alcotest.test list -> unit
+       but an expression was expected of type unit
 ```
