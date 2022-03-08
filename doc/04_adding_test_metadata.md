@@ -1,9 +1,4 @@
----
-id: tags
-title: Running tests conditionally
-sidebar_label: Running tests conditionally
-slug: /tags
----
+# 4. Adding test metadata
 
 Sometimes, it's helpful to be able to decide whether or not to run certain tests
 at run-time, according to various conditions. For example, we might care about:

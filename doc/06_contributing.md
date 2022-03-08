@@ -1,9 +1,4 @@
----
-id: contributing
-title: Contributing
-sidebar_label: Guidance
-slug: /contributing
----
+# 6. Contributing to Alcotest
 
 ## Setting up your working environment
 

@@ -1,9 +1,4 @@
----
-id: migration_v1
-title: Upgrading from version 1.x
-sidebar_label: Upgrading from version 1.x
-slug: /v1_migration
----
+# 5. Migrating from V1
 
 The simplest way to upgrade an Alcotest 1.x test suite to support Alcotest opam
 releases 2.0 and above is to switch to using the _versioned_ API:

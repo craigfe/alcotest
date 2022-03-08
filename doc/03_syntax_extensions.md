@@ -1,4 +1,4 @@
-# 2. Syntax extensions
+# 3. Syntax extensions
 
 The recommended way to use Alcotest is via `ppx_alcotest`. This has several advantages:
 
