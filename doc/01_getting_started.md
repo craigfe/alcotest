@@ -9,16 +9,17 @@ Install them with [Opam][opam]:
 ; opam install dune alcotest ppx_alcotest
 ```
 
-We're going to setup a starter project with the following structure:
+We'll be writing our tests in a file called `my_tests.ml`, meaning we'll need
+at least the following structure:
 
+<!-- $MDX skip -->
 ```bash
 ├── dune-project  # Top-level Dune project definition for Dune
 ├── dune          # Build rules for the project
 └── my_tests.ml   # OCaml file containing
 ```
 
-We'll be writing our tests in a file called `my_tests.ml`, so let's set up a
-`dune` file with the right stanza:
+First let's set up the necessary build system configuration:
 
 ```dune
 ;; dune-project
@@ -27,10 +28,13 @@ We'll be writing our tests in a file called `my_tests.ml`, so let's set up a
 
 ```dune
 ;; dune
+
+;; Define an executable called `my_tests` (implicitly contained in the 
+;; OCaml module provided by `my_tests.ml`)
 (test
  (name my_tests)
- (libraries alcotest)
- (preprocess (pps ppx_alcotest)))
+ (libraries alcotest)             ;; Use the `alcotest` library
+ (preprocess (pps ppx_alcotest))) ;; Use Alcotest's syntax extensions
 ```
 
 Now we can write some tests in `my_tests.ml`:
