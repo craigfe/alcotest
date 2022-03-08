@@ -6,11 +6,12 @@ To clone the project's sources and install its various dependencies, run:
 
 <!-- $MDX skip -->
 ```bash
-; git clone https://github.com/mirage/alcotest.git    # Get the repository
+; git clone https://github.com/mirage/alcotest.git        # Get the repository
 ; cd alcotest
 
-; opam switch create ./ ocaml-base-compiler.4.10.0    # OPTIONAL: install a project-local Opam switch
-; opam install -t --deps-only .                       # Install regular and test dependencies
+; opam switch create alcotest ocaml-base-compiler.4.13.1  # OPTIONAL: install a project-specific Opam switch
+; opam switch link alcotest
+; opam install -t --deps-only .                           # Install regular and test dependencies
 ```
 
 Now you can work on the project using the standard Dune commands:
