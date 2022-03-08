@@ -83,7 +83,7 @@ ways with Dune, but a typical project structure might look like this:
     internal library that is consumed only by the executable and the tets, or
     using [cram tests][dune-cram] to test the binary API itself (or both!).
 
-See the [next section](./02_testable_types.md) or [go back](../).
+See the [next section](./02_testable_types.md) or [go back](./).
 
 [dune]: https://dune.readthedocs.io/en/stable/
 [dune-cram]: TODO
